@@ -1,0 +1,10 @@
+;$Id$
+
+name = Contact Us
+description = A contact us module.
+core = 7.x
+package = Drupal 7 Development
+files[] = contactus.module
+
+;dependencies[] = autoload
+;php = 5.2

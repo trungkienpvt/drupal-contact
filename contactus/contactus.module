@@ -1,0 +1,406 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ * A module exemplifying Drupal coding practices and APIs.
+ *
+ * This module provides a block that lists all of the 
+ * installed modules. It illustrates coding standards, 
+ * practices, and API use for Drupal 7.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function contactus_help($path, $arg) {
+    if ($path == 'admin/help#navigation') {
+        return t('A demonstration module.');
+    }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function contactus_block_info() {
+    $blocks = array();
+
+    $blocks['list_modules'] = array(
+        'info' => t('Contact Us block.'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+
+    return $blocks;
+}
+
+/**
+ * implement hook_menu
+ * */
+function contactus_menu() {
+    $items['contact-us'] = array(
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('form_contact'),
+//		'access arguments' => array('access content'),  // rights for users
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+        'weight' => -7
+    );
+    $items['contact-us/save'] = array(
+        'page callback' => 'contactus_save',
+        'access arguments' => array('access content'),
+        'type' => MENU_SUGGESTED_ITEM,
+        'weight' => -7
+    );
+    return $items;
+}
+
+/**
+ *
+ * create form contact
+ */
+function form_contact() {
+    drupal_set_title('Contact Us');
+    $form = array();
+    $form['#prefix'] = '<div class="feat_prod_box_details">
+            <p class="details">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.
+            </p>';
+    $form['#suffix'] = '</div>';
+    $form['#attributes']['class'][] = 'contact_form';
+    $form['txtName'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Name',
+        '#required' => TRUE,
+        '#description' => t(''),
+        '#size'=> 20,
+    	'#theme_wrappers' => array('custom_form_element'),
+        '#attributes' => array('placeholder' => t('Name')),
+    	'#prefix'=>'<div class="form_subtitle">all fields are requierd</div>
+    	<div class="form_row">',
+    	'#suffix'=>'</div>',
+        '#default-value' => t('Name'),
+        '#attributes' => array('class' => array('input-1')),
+
+    );
+
+    $form['txtEmail'] = array(
+        '#type' => 'textfield',
+        '#required'=>true,
+        '#title' => t('Email'),
+        '#required' => TRUE,
+        '#rules' => array(
+            'email',
+            'length[10, 50]',
+        ),
+        '#description' => t(''),
+        '#size' => 20,
+        '#theme_wrappers' => array(
+            'custom_form_element'),
+        '#attributes' => array('placeholder' => t('Email')),
+        '#default-value' => 'email',
+        '#prefix'=>'<div class="form_row">',
+        '#suffix'=>'</div>',
+        '#attributes' => array('class' => array('input-1')),
+    );
+    $form['txtPhone'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Điện thoại'),
+        '#description' => t(''),
+        '#size' => 20,
+        '#theme_wrappers' => array(
+            'custom_form_element'),
+        '#attributes' => array('placeholder' => t('Phone')),
+        '#default-value' => 'Điện thoại',
+        '#prefix'=>'<div class="form_row">',
+        '#suffix'=>'</div>',
+        '#attributes' => array('class' => array('input-1')),
+    );
+
+    $form['txtCompany'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Company'),
+        '#description' => t(''),
+        '#size' => 20,
+        '#theme_wrappers' => array(
+            'custom_form_element'),
+        '#attributes' => array('placehoslder' => t('Company name')),
+        '#default-value' => t('Company name'),
+        '#prefix'=>'<div class="form_row">',
+        '#suffix'=>'</div>',
+        '#attributes' => array('class' => array('input-1')),
+    );
+    $form['txtContent'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Message'),
+        '#required' => TRUE,
+        '#cols' => 40,
+        '#description' => t(''),
+        '#theme_wrappers' => array('custom_form_element'),
+        '#attributes' => array('placeholder' => t('Message')),
+        '#default-value' => 'Message'
+//    ,
+//        '#prefix'=>'<div class="form_row">',
+//    	'#suffix'=>'<div class="form_row">
+//    	<a href="javascript:void()" onclick="document.forms[0].submit()" class="contact">send</a>
+//    	</div>'
+    ,
+        '#attributes' => array('class' => array('textarea-1')),
+    );
+
+    $form['submit'] = array(
+    '#type'=>'submit',
+    '#title'=>t('Send'),
+    '#value'=>t('Send'),
+    '#prefix'=>'<div class="form_row">',
+    '#suffix'=>'</div>',
+    '#attributes' => array('class'=>array('contact'))
+    );
+    return $form;
+}
+
+function contactus_fapi_validation_rules() {
+    return array(
+        'rule_name' => array(
+            'callback' => 'mymodule_validation_rule_name',
+            'error_msg' => 'Invalid value for %field'
+        ),
+        'other_rule' => array(
+            'callback' => 'mymodule_validation_other_rule',
+            'error_msg' => "Don't use this value at field %field"
+        ),
+    );
+}
+function form_contact_validate(&$form, &$form_state){
+	if (empty($form_state['values']['txtName'])) {
+	}
+	
+}
+function form_contact_submit($form, &$form_state){
+    global $language, $user;
+    $txtName = $form_state['values']['txtName'];
+    $txtCompany = $form_state['values']['txtCompany'];
+    $txtEmail = $form_state['values']['txtEmail'];
+    $txtPhone = $form_state['values']['txtPhone'];
+    $txtContent = $form_state['values']['txtContent'];
+    $node = new stdClass();
+//    var_dump($form_state);exit;
+    $arr_name = array(
+        'und' => array(
+            array(
+                'value' => $txtName,
+                'format' => '',
+                'safe_value' => $txtName
+            )
+        )
+    );
+    $arr_email = array(
+        'und' => array(
+            array(
+                'value' => $txtEmail,
+                'format' => '',
+                'safe_value' => $txtEmail
+            )
+        )
+    );
+    $arr_company = array(
+        'und' => array(
+            array(
+                'value' => $txtCompany,
+                'format' => '',
+                'safe_value' => $txtCompany
+            )
+        )
+    );
+    $arr_phone = array(
+        'und' => array(
+            array(
+                'value' => $txtPhone,
+                'format' => '',
+                'safe_value' => $txtPhone
+            )
+        )
+    );
+    $arr_message = array(
+        'und' => array(
+            array(
+                'value' => $txtContent,
+                'format' => 'filter',
+                'safe_value' => $txtContent
+            )
+        )
+    );
+    
+    $node->title = $txtName;
+    $node->status = 1;
+    $node->nid =null;
+    $node->vid =null;
+    $node->type = 'contact_information';
+    $node->language = 'und';
+    $node->created = REQUEST_TIME;
+    $node->changed = REQUEST_TIME;
+    $node->translate = 0;
+    $node->revision_timestamp = REQUEST_TIME;
+    $node->revision = 1;
+    $node->format = 0; 
+    $node->uid = $user->uid;
+    $node->field_contact_name = $arr_name;
+    $node->field_contact_email = $arr_email;
+    $node->field_contact_company = $arr_company;
+    $node->field_contact_phone = $arr_phone;
+    $node->field_contact_message = $arr_message;
+    $node->log = t('Node saved: '.$node->title);
+    $mail_admin = variable_get('site_mail', ini_get('sendmail_from'));
+    $language_default = language_default();
+    drupal_mail('contactus', 'contact_admin', $mail_admin, $language_default, $_POST);
+    drupal_mail('contactus', 'thanks_you', $txtEmail, $language_default, $_POST);
+    node_save($node);
+ // Small hack to link revisions to our test user.
+    db_update('node_revision')
+    ->fields(array('uid' => $node->uid))
+    ->condition('vid', $node->vid)
+    ->execute();
+    drupal_set_message(t('send message successful'));
+    drupal_goto($lang . 'contact-us/');
+}
+
+
+/**
+ * implement hook_mail()
+ * */
+function contactus_mail($key, &$message, $params) {
+
+    $name = $params['txtName'];
+    $company = $params['txtCompany'];
+    $email = $params['txtEmail'];
+    $phone = $params['txtPhone'];
+    $title = 'Contact with admin';
+    $content = $params['txtContent'];
+
+    $site_name = variable_get('site_name', $_SERVER['HTTP_HOST']);
+    switch ($key) {
+        case 'contact_admin':
+            $message['subject'] = 'Contact from user : ' .  $name;
+            $message['body'] = array();
+            $message['body'][] = 'This is content of contact:';
+            $message['body'][] = 'Name: ' . $name;
+            $message['body'][] = 'Company: ' . $company;
+            $message['body'][] = 'Email: ' . $email;
+            $message['body'][] = 'Phone: ' . $phone;
+            $message['body'][] = 'Title: ' . $title;
+            $message['body'][] = 'Content: ' . $content;
+            break;
+        case 'thanks_you':
+            $message['subject'] = 'Thank you from admin ' . $site_name;
+            $message['body'] = array();
+            $message['body'][] = 'Hi ' . $name ;
+            $message['body'][] = 'Your request has been sent to admin ' . $site_name;
+            $message['body'][] = 'Thanks you.';
+            $message['body'][] = $site_name;
+            break;
+    }
+}
+
+/**
+ * implement hook_theme()
+ * */
+function contactus_theme() {
+    return array(
+//        '_contactus_template' => array(
+//            'template' => '_contactus_template',
+//            'variables' => array('obj_contactus' => null)
+//        ),
+//        '_contactus_template_extra' => array(
+//            'template' => '_contactus_template_extra',
+//            'variables' => array('content_form' => null)
+//        ),
+        'custom_form_element' => array('render element' => 'element', 
+        'function' => 'ex_custom_form_element')
+    );
+    
+}
+
+function ex_custom_form_element (&$variables)
+{
+    $element = $variables['element'];
+    if ($element['#type'] == 'textarea')
+        $element['#children'] = preg_replace(
+            '/.*(<textarea.*textarea>).*/i', '\1',
+            $element['#children']);
+    $t = get_t();
+    // Add element #id for #type 'item'.
+
+    if (isset($element['#markup']) && ! empty(
+        $element['#id'])) {
+        $attributes['id'] = $element['#id'];
+    }
+    // If #title is not set, we don't display any label or required marker.
+    if (! isset($element['#title'])) {
+        $element['#title_display'] = 'none';
+    }
+    $prefix = isset($element['#field_prefix']) ? $element['#field_prefix'] : '';
+    $suffix = isset($element['#field_suffix']) ? $element['#field_suffix'] : '';
+    $output = '';
+    switch ($element['#title_display']) {
+        case 'before':
+            $output .= ' ' . custom_theme_form_element_label($variables);
+            $output .= ' ' . $prefix .
+                $element['#children'] .
+                $suffix . "\n";
+            break;
+        case 'invisible':
+        case 'after':
+            $output .= ' ' . $prefix .
+                $element['#children'] .
+                $suffix;
+            $output .= ' ' . custom_theme_form_element_label($variables) . "\n";
+            break;
+        case 'none':
+        case 'attribute':
+            // Output no label and no required marker, only the children.
+            $output .= ' ' .
+                $prefix . $element['#children'] .
+                $suffix . "\n";
+            break;
+    }
+    if (! empty($element['#description'])) {
+        $output .= ' <div class="description">' .
+            $element['#description'] . "</div>\n";
+    }
+    return $output;
+}
+
+function custom_theme_form_element_label($variables) {
+    $element = $variables['element'];
+    // This is also used in the installer, pre-database setup.
+    $t = get_t();
+
+    // If title and required marker are both empty, output no label.
+    if ((!isset($element['#title']) || $element['#title'] === '') && empty($element['#required'])) {
+        return '';
+    }
+
+    // If the element is required, a required marker is appended to the label.
+    $required = !empty($element['#required']) ? theme('form_required_marker', array('element' => $element)) : '';
+
+    $title = filter_xss_admin($element['#title']);
+
+    $attributes = array();
+    // Style the label as class option to display inline with the element.
+    if ($element['#title_display'] == 'after') {
+        $attributes['class'] = 'option';
+    }
+    // Show label only to screen readers to avoid disruption in visual flows.
+    elseif ($element['#title_display'] == 'invisible') {
+        $attributes['class'] = 'element-invisible';
+    }
+
+    if (!empty($element['#id'])) {
+        $attributes['for'] = $element['#id'];
+    }
+    // The leading whitespace helps visually separate fields from inline labels.
+    return ' <label' . drupal_attributes($attributes) . ' class="contact">' . '<strong>' .$t('!title !required', array('!title' => $title, '!required' => $required)) . '</strong>' . "</label>\n";
+}
+function contactus_block_view_alter($data,$block){
+}
+
